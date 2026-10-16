@@ -1,5 +1,6 @@
 {
   "_note": "The house style. Scripts and the page read this file. When the user changes a setting, change it here (and log it in MY_STYLE.md) so every future edit keeps it.",
+  "handle": "@beaubushh",
   "fps": 30,
   "width": 1080,
   "height": 1920,
@@ -16,13 +17,25 @@
     "lead_s": 0.04,
     "hold_s": 0.5,
     "gap_break_s": 0.28,
-    "censor": {"fuck": "f*ck", "fucking": "f*cking", "fucked": "f*cked", "shit": "sh*t", "bitch": "b*tch", "ass": "a*s"}
+    "censor": {
+      "fuck": "f*ck",
+      "fucking": "f*cking",
+      "fucked": "f*cked",
+      "shit": "sh*t",
+      "bitch": "b*tch",
+      "ass": "a*s"
+    }
   },
-  "safe_area": {"top": 192, "bottom": 1536, "rail_x": 900, "rail_from_y": 960},
+  "safe_area": {
+    "top": 192,
+    "bottom": 1536,
+    "rail_x": 900,
+    "rail_from_y": 960
+  },
   "audio": {
     "voice_gain": 2.0,
     "music_intro_gain": 0.25,
-    "music_gain": 0.10,
+    "music_gain": 0.1,
     "music_fade_out_s": 1.2,
     "sfx_gain_db": -7,
     "limit_db": -1.0

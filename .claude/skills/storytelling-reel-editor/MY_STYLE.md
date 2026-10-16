@@ -5,3 +5,4 @@ Claude adds a line here whenever you make a style change permanent ("make that t
 
 | Date | What you said | What changed |
 |---|---|---|
+| 2026-10-16 | "@beaubushh is my handle on insta" | `handle` set to `@beaubushh` in style.json (used for the comment-CTA sheet) |
