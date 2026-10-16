@@ -29,7 +29,7 @@ CHROME="${CHROME:-}"
 if [ -z "$CHROME" ]; then
   for c in "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "/Applications/Chromium.app/Contents/MacOS/Chromium" \
            "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary" "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser" \
-           "$(command -v google-chrome 2>/dev/null)" "$(command -v google-chrome-stable 2>/dev/null)" "$(command -v chromium 2>/dev/null)" "$(command -v chromium-browser 2>/dev/null)"; do
+           "$(command -v google-chrome 2>/dev/null)" "$(command -v google-chrome-stable 2>/dev/null)" "$(command -v chromium 2>/dev/null)" "$(command -v chromium-browser 2>/dev/null)" "/opt/pw-browsers/chromium"; do
     if [ -n "$c" ] && [ -x "$c" ]; then CHROME="$c"; break; fi
   done
 fi
