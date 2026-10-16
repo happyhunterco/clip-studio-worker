@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reel compositor</title>
+<style>
+@font-face { font-family: "TikTok Sans"; font-weight: 300 900; src: url(fonts/TikTokSans-latin.woff2) format("woff2"); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+#a { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+.ui { position: absolute; display: none; will-change: transform, opacity; }
+
+/* captions: values come from style.json (see runtime.js) — white, no shadow, no outline, no box, no animation */
+#cap { position: absolute; left: 0; right: 0; transform: translateY(-50%); text-align: center; white-space: nowrap; z-index: 50;
+  font-family: var(--cap-font), sans-serif; font-weight: var(--cap-weight); font-size: var(--cap-size); letter-spacing: var(--cap-track);
+  line-height: var(--cap-lh); color: var(--cap-color); top: var(--cap-y); }
+
+/* dark glass card (iOS widget) */
+.card { border-radius: 34px; background: rgba(20,20,24,.62); -webkit-backdrop-filter: blur(26px) saturate(1.4); backdrop-filter: blur(26px) saturate(1.4);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset, 0 24px 60px -20px rgba(0,0,0,.55); color: #fff; }
+.card .hd { position: absolute; left: 28px; right: 28px; top: 22px; height: 44px; display: flex; align-items: center; gap: 14px; font-size: 27px; font-weight: 600; }
+.card .hd .sub { font-weight: 400; color: rgba(255,255,255,.62); }
+.card .hd .r { margin-left: auto; font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tile { border-radius: 11px; display: grid; place-items: center; flex: none; overflow: hidden; }
+.tile svg { overflow: visible; }
+
+/* media grid inside a card */
+.grid { position: absolute; display: grid; }
+.grid .v { position: relative; border-radius: 14px; overflow: hidden; background: #111; }
+.grid .v img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* iOS notification banner */
+.nt { left: 70px; top: 0; width: 940px; height: 124px; border-radius: 32px; background: rgba(246,246,248,.88);
+  -webkit-backdrop-filter: blur(30px) saturate(1.6); backdrop-filter: blur(30px) saturate(1.6);
+  box-shadow: 0 20px 44px -18px rgba(0,0,0,.45); align-items: center; gap: 22px; padding: 0 30px 0 24px; color: #111; }
+.nt .tx { flex: 1; min-width: 0; }
+.nt .t1 { display: flex; justify-content: space-between; font-size: 27px; font-weight: 600; }
+.nt .t1 span { font-weight: 400; color: #8a8a8e; font-size: 24px; }
+.nt .t2 { margin-top: 2px; font-size: 27px; color: #1c1c1e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* iOS Focus pill (Sleep, Do Not Disturb...) */
+.pill { left: 50%; height: 54px; padding: 0 26px 0 18px; border-radius: 27px; background: rgba(28,28,34,.72);
+  -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); align-items: center; gap: 12px; color: #fff; font-size: 26px; font-weight: 600; }
+.pill svg { width: 30px; height: 30px; }
+
+/* talk-back bubble: an app/AI "replies" to what the speaker just said */
+.say { align-items: flex-end; gap: 14px; }
+.say .tile { width: 56px; height: 56px; border-radius: 15px; }
+.say .bb { max-width: 880px; padding: 18px 26px 16px; border-radius: 30px 30px 30px 8px; background: rgba(20,20,24,.62);
+  -webkit-backdrop-filter: blur(26px) saturate(1.4); backdrop-filter: blur(26px) saturate(1.4);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset, 0 18px 44px -18px rgba(0,0,0,.55); color: #fff; }
+.say .q { font-size: 38px; font-weight: 500; line-height: 1.25; }
+.say .by { margin-top: 6px; font-size: 28px; font-weight: 500; color: rgba(255,255,255,.6); }
+.say.one .bb { padding: 14px 26px; }
+.say.one .by { display: inline; margin: 0 0 0 14px; }
+
+/* Instagram comment sheet (dark) for a "Comment X" CTA */
+.cmt { left: 60px; width: 960px; height: 330px; border-radius: 34px; background: #212121; color: #f5f5f5; box-shadow: 0 24px 60px -20px rgba(0,0,0,.6); overflow: hidden; }
+.cmt .grab { position: absolute; left: 50%; top: 14px; width: 64px; height: 6px; margin-left: -32px; border-radius: 3px; background: #5a5a5a; }
+.cmt .h { position: absolute; left: 0; right: 0; top: 34px; text-align: center; font-size: 27px; font-weight: 700; }
+.cmt .line { position: absolute; left: 0; right: 0; top: 84px; height: 1px; background: #333; }
+.cmt .row { position: absolute; left: 30px; right: 30px; top: 110px; display: none; align-items: flex-start; gap: 18px; }
+.cmt .av { width: 60px; height: 60px; border-radius: 50%; background: #3a3a3c; flex: none; overflow: hidden; }
+.cmt .who { font-size: 23px; font-weight: 600; }
+.cmt .who span { font-weight: 400; color: #a8a8a8; margin-left: 8px; }
+.cmt .msg { margin-top: 4px; font-size: 30px; font-weight: 500; }
+.cmt .rp { margin-top: 6px; font-size: 21px; color: #a8a8a8; font-weight: 600; }
+.cmt .hrt { margin-left: auto; width: 34px; height: 34px; margin-top: 16px; }
+.cmt .in { position: absolute; left: 30px; right: 30px; bottom: 26px; height: 74px; display: flex; align-items: center; gap: 16px; }
+.cmt .in .av { width: 54px; height: 54px; }
+.cmt .field { flex: 1; height: 64px; border-radius: 32px; border: 1.5px solid #4a4a4a; display: flex; align-items: center; padding: 0 22px; font-size: 26px; color: #a8a8a8; white-space: nowrap; overflow: hidden; }
+.cmt .field b { color: #f5f5f5; font-weight: 500; }
+.cmt .caret { display: inline-block; width: 2px; height: 30px; background: #f5f5f5; margin-left: 2px; vertical-align: middle; }
+.cmt .post { font-size: 26px; font-weight: 700; color: #4b5d7a; padding: 0 6px; }
+.cmt .post.on { color: #4DA3FF; }
+
+/* debug overlay for stills: the TikTok/Reels no-go zones (?zones=1) */
+.zone { position: absolute; background: rgba(255,0,0,.28); z-index: 99; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <img id="a" alt="">
+  <div id="cap"></div>
+</div>
+<script src="data.js"></script>
+<script src="icons.js"></script>
+<script src="runtime.js"></script>
+<script src="beats.js"></script>
+<script>window.__start();</script>
+</body>
+</html>
